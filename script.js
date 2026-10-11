@@ -270,14 +270,14 @@ function setupThemeToggle() {
   }));
 }
 
-// Use your school crest if crest.png is uploaded next to index.html
+// Use your school crest if logo.png is uploaded next to index.html
 function loadCrest() {
   const slot = document.querySelector('.auth-crest');
   if (!slot) return;
   const img = new Image();
   img.alt = 'School crest';
   img.onload = () => { slot.textContent = ''; slot.appendChild(img); slot.classList.add('has-img'); };
-  img.src = 'crest.png';
+  img.src = 'logo.png';
 }
 
 function setupPasswordToggles() {
