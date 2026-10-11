@@ -4,7 +4,7 @@ let concerns = JSON.parse(localStorage.getItem('sys_concerns')) || [];
 let equipmentReports = JSON.parse(localStorage.getItem('sys_equipment')) || [];
 let currentUser = JSON.parse(localStorage.getItem('sys_current_user')) || null;
 
-// Admin accounts (sign in with Admin ID + password). Passwords are stored as SHA-256 hashes.
+// Admin accounts (sign in with ID Number, e.g. ADMIN-001, + password). Passwords are stored as SHA-256 hashes.
 const ADMIN_ACCOUNTS = [
   { id: 'ADMIN-001', name: 'System Administrator',   passwordHash: '744ad369f878174eb38802539de92d957b86846b90808835325db7df4a181861' },
   { id: 'ADMIN-002', name: 'Facilities Officer',      passwordHash: 'f9340a966e3f4c5346147f53eb6af534e57f2b511f65e40e703caa30508a869a' },
@@ -331,22 +331,20 @@ function updateUIState() {
 }
 
 function updateAdminUIState() {
-  const authCard = document.getElementById('adminAuthCard');
-  const dashboard = document.getElementById('adminDashboard');
+  // Admins sign in on the main login page; anyone else is sent back there.
+  if (!isAdminLoggedIn) {
+    window.location.replace('index.html');
+    return;
+  }
 
-  document.body.classList.toggle('auth-mode', !isAdminLoggedIn);
-  authCard.classList.toggle('hidden', isAdminLoggedIn);
-  dashboard.classList.toggle('hidden', !isAdminLoggedIn);
-
+  document.getElementById('adminDashboard').classList.remove('hidden');
   const whoami = document.getElementById('adminWhoami');
   const account = ADMIN_ACCOUNTS.find((a) => a.id === currentAdminId);
-  if (whoami) whoami.textContent = isAdminLoggedIn && account ? `Signed in as ${account.name} (${account.id})` : '';
+  if (whoami && account) whoami.textContent = `Signed in as ${account.name} (${account.id})`;
 
-  if (isAdminLoggedIn) {
-    renderAdminEquipment();
-    renderAdminConcerns();
-    renderAccountsList();
-  }
+  renderAdminEquipment();
+  renderAdminConcerns();
+  renderAccountsList();
   renderDashboardSummary();
 }
 
@@ -389,7 +387,7 @@ function setupAuthHandlers() {
 
     const studentIdPattern = /^\d+-\d+$/;
     if (!studentIdPattern.test(studentId)) {
-      alert('Invalid Student ID format! The accepted format is digits followed by a hyphen and digits (e.g., 2025-0461).');
+      alert('Invalid ID Number format! Students use digits, a hyphen, then digits (e.g., 2025-0461).');
       return;
     }
 
@@ -405,7 +403,7 @@ function setupAuthHandlers() {
     }
 
     if (users.find(u => u.studentId === studentId || u.email.toLowerCase() === email.toLowerCase())) {
-      alert('A student account with this ID or Gmail address already exists.');
+      alert('An account with this ID Number or Gmail address already exists.');
       return;
     }
 
@@ -417,20 +415,37 @@ function setupAuthHandlers() {
     regForm.reset();
   });
 
-  // Login Student
-  loginForm.addEventListener('submit', (e) => {
+  // Login (students and admins use the same form)
+  loginForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const studentId = document.getElementById('loginStudentId').value.trim();
+    const idNumber = document.getElementById('loginStudentId').value.trim();
     const password = document.getElementById('loginPassword').value;
 
-    const user = users.find(u => u.studentId === studentId && u.password === password);
+    // Admin IDs look like ADMIN-001
+    if (/^admin-/i.test(idNumber)) {
+      const account = await authenticateAdmin(idNumber, password);
+      if (!account) {
+        alert('Invalid ID or password!');
+        return;
+      }
+      isAdminLoggedIn = true;
+      currentAdminId = account.id;
+      currentUser = null;
+      saveData();
+      window.location.href = 'admin.html';
+      return;
+    }
+
+    const user = users.find(u => u.studentId === idNumber && u.password === password);
     if (user) {
+      isAdminLoggedIn = false;
+      currentAdminId = null;
       currentUser = user;
       saveData();
       updateUIState();
       loginForm.reset();
     } else {
-      alert('Invalid Student ID or Password!');
+      alert('Invalid ID or password!');
     }
   });
 
@@ -474,7 +489,7 @@ function setupResetPasswordHandlers() {
     const targetUser = users.find(u => u.studentId === studentId);
 
     if (!targetUser) {
-      alert('No account found with that Student ID!');
+      alert('No account found with that ID Number!');
       return;
     }
 
@@ -742,7 +757,6 @@ function renderStudentEquipment() {
 
 // Admin Panel Logic
 function setupAdminHandlers() {
-  const adminLoginForm = document.getElementById('adminLoginForm');
   const searchInput = document.getElementById('adminSearchInput');
   const typeFilter = document.getElementById('adminTypeFilter');
   const adminMenu = document.querySelector('.dashboard-menu[aria-label="Admin dashboard menu"]');
@@ -762,28 +776,11 @@ function setupAdminHandlers() {
     });
   });
 
-  adminLoginForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const adminId = document.getElementById('adminId').value.trim();
-    const pass = document.getElementById('adminPassword').value;
-
-    const account = await authenticateAdmin(adminId, pass);
-    if (account) {
-      isAdminLoggedIn = true;
-      currentAdminId = account.id;
-      saveData();
-      updateAdminUIState();
-      adminLoginForm.reset();
-    } else {
-      alert('Invalid Admin ID or password!');
-    }
-  });
-
   document.getElementById('adminLogoutBtn').addEventListener('click', () => {
     isAdminLoggedIn = false;
     currentAdminId = null;
     saveData();
-    updateAdminUIState();
+    window.location.href = 'index.html';
   });
 
   searchInput.addEventListener('input', renderAdminConcerns);
