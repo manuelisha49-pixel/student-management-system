@@ -1554,3 +1554,177 @@ body.dark-mode .theme-fab .icon-sun { display: block; }
 .auth-shell .forgot-link { margin: 12px 0 16px; }
 .auth-submit { height: 50px; margin-top: 4px; }
 .auth-submit-gap { margin-top: 22px; }
+
+
+/* =====================================================
+   DASHBOARDS (student + admin) — same look as the sign-in screen
+   Indigo gradient panels, Montserrat headings, pill buttons,
+   soft rounded fields. Scoped so the sign-in card is untouched.
+   ===================================================== */
+body[data-page] {
+  --d-ink: #14104d;
+  --d-muted: #5b6188;
+  --d-btn: #1b1560;
+  --d-btn-hover: #2a2190;
+  --d-field: #e8edfb;
+  --d-field-border: #d5dcf5;
+  --d-panel: linear-gradient(165deg, #271d8c 0%, #1c1470 55%, #171060 100%);
+  --d-shadow: 0 18px 44px rgba(27, 21, 96, 0.14);
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+}
+body.dark-mode[data-page] {
+  --d-ink: #f1f3ff;
+  --d-muted: #a3abd6;
+  --d-btn: #5249e6;
+  --d-btn-hover: #6a62f5;
+  --d-field: #1b2145;
+  --d-field-border: #2b3262;
+  --d-panel: linear-gradient(165deg, #1b1470 0%, #130e55 55%, #0e0a3f 100%);
+  --d-shadow: 0 18px 44px rgba(0, 0, 0, 0.45);
+}
+
+/* Top bar on the admin page */
+body[data-page] .view-switcher .theme-btn {
+  border-radius: 999px; padding: 10px 20px; border: 1px solid var(--border-color);
+  background: var(--card-bg); color: var(--d-ink); font: 700 0.85rem 'Montserrat', 'Segoe UI', sans-serif; cursor: pointer;
+}
+
+/* Welcome header = the indigo side panel */
+body[data-page] .header-bar {
+  padding: 26px 32px; margin-bottom: 18px; border-radius: 28px; color: #fff;
+  background: radial-gradient(circle at 85% 8%, rgba(255, 255, 255, 0.14), transparent 42%), var(--d-panel);
+  box-shadow: var(--d-shadow);
+}
+body[data-page] .header-bar h2 {
+  color: #fff; font-family: 'Montserrat', 'Segoe UI', sans-serif; font-weight: 800;
+  font-size: clamp(1.4rem, 2.4vw, 1.9rem); line-height: 1.2;
+}
+body[data-page] .header-bar .portal-eyebrow,
+body[data-page] .header-bar .admin-whoami { color: rgba(255, 255, 255, 0.78); }
+body[data-page] .header-bar .btn.secondary {
+  background: transparent; color: #fff; border: 2px solid #fff;
+}
+body[data-page] .header-bar .btn.secondary:hover { background: #fff; color: #1b1560; }
+
+/* Section menu = pill switcher */
+body[data-page] .dashboard-menu {
+  padding: 6px; gap: 6px; border-radius: 999px; border: 1px solid var(--d-field-border);
+  background: var(--card-bg); box-shadow: var(--d-shadow);
+}
+body[data-page] .dashboard-menu a,
+body[data-page] .dashboard-menu button {
+  padding: 11px 22px; border-radius: 999px; color: var(--d-muted);
+  font: 700 0.9rem 'Montserrat', 'Segoe UI', sans-serif; transition: background-color 0.25s, color 0.25s;
+}
+body[data-page] .dashboard-menu a:hover,
+body[data-page] .dashboard-menu a:focus-visible,
+body[data-page] .dashboard-menu button:hover,
+body[data-page] .dashboard-menu button:focus-visible { background: var(--accent-soft); color: var(--d-ink); }
+body[data-page] .dashboard-menu button.active,
+body[data-page] .dashboard-menu a.active { background: var(--d-btn); color: #fff; box-shadow: 0 8px 18px color-mix(in srgb, var(--d-btn) 35%, transparent); }
+
+/* Cards */
+body[data-page] .card {
+  padding: 30px 32px; border-radius: 28px; border: 1px solid var(--d-field-border);
+  background: var(--card-bg); box-shadow: var(--d-shadow);
+}
+body[data-page] .card > h3,
+body[data-page] .card h3 {
+  margin: 0 0 18px; color: var(--d-ink); font-family: 'Montserrat', 'Segoe UI', sans-serif; font-weight: 800; font-size: 1.3rem;
+}
+
+/* Sub tabs */
+body[data-page] .sub-tab-btn {
+  padding: 12px 16px; border-radius: 999px; border: 2px solid var(--d-field-border);
+  background: var(--d-field); color: var(--d-muted); font: 700 0.9rem 'Montserrat', 'Segoe UI', sans-serif;
+  transition: background-color 0.25s, color 0.25s, border-color 0.25s;
+}
+body[data-page] .sub-tab-btn:hover { border-color: var(--d-btn); color: var(--d-ink); }
+body[data-page] .sub-tab-btn.active { background: var(--d-btn); border-color: var(--d-btn); color: #fff; }
+
+/* Fields — same as the sign-in inputs */
+body[data-page] .card label,
+body[data-page] .modal-card label {
+  display: block; margin: 12px 0 6px 6px; font-size: 0.8rem; font-weight: 600; color: var(--d-muted);
+}
+body[data-page] .card input:not([type="file"]):not([type="checkbox"]):not([type="radio"]),
+body[data-page] .card select,
+body[data-page] .modal-card input {
+  width: 100%; height: 50px; padding: 0 20px; border-radius: 14px; border: 2px solid var(--d-field-border);
+  background: var(--d-field); color: var(--d-ink); font-size: 1rem; box-shadow: inset 0 2px 5px rgba(27, 21, 96, 0.07);
+}
+body[data-page] .card textarea,
+body[data-page] .modal-card textarea {
+  width: 100%; padding: 14px 20px; border-radius: 14px; border: 2px solid var(--d-field-border);
+  background: var(--d-field); color: var(--d-ink); font-size: 1rem; font-family: inherit; box-shadow: inset 0 2px 5px rgba(27, 21, 96, 0.07);
+}
+body[data-page] .card input[type="file"] {
+  width: 100%; padding: 12px 16px; border-radius: 14px; border: 2px dashed var(--d-field-border);
+  background: var(--d-field); color: var(--d-muted); font-size: 0.9rem;
+}
+body[data-page] .card input::placeholder,
+body[data-page] .card textarea::placeholder { color: var(--d-muted); opacity: 0.7; }
+body[data-page] .card input:focus,
+body[data-page] .card select:focus,
+body[data-page] .card textarea:focus,
+body[data-page] .modal-card input:focus {
+  outline: none; border-color: var(--d-btn);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--d-btn) 22%, transparent);
+}
+
+/* Buttons — pills like "Sign in" */
+body[data-page] .btn {
+  padding: 13px 28px; border-radius: 999px; font: 800 0.95rem 'Montserrat', 'Segoe UI', sans-serif; letter-spacing: 0.02em;
+  transition: transform 0.25s, background-color 0.25s, box-shadow 0.25s;
+}
+body[data-page] .btn:hover { transform: translateY(-2px); }
+body[data-page] .btn:focus-visible { outline: 3px solid color-mix(in srgb, var(--d-btn) 40%, transparent); outline-offset: 3px; }
+body[data-page] .btn.primary {
+  background: var(--d-btn); color: #fff; box-shadow: 0 10px 22px color-mix(in srgb, var(--d-btn) 32%, transparent);
+}
+body[data-page] .btn.primary:hover { background: var(--d-btn-hover); }
+body[data-page] .btn.secondary { background: var(--accent-soft); color: var(--d-ink); }
+body[data-page] .btn.secondary:hover { background: var(--secondary-btn-bg); }
+body[data-page] .dashboard-form > .btn.primary { align-self: flex-start; margin-top: 12px; }
+
+/* Summary cards */
+body[data-page] .summary-grid { gap: 16px; }
+body[data-page] .summary-card {
+  padding: 22px; border-radius: 22px; border: 1px solid var(--d-field-border); border-top: 4px solid var(--d-btn);
+  background: var(--card-bg); box-shadow: var(--d-shadow);
+}
+body[data-page] .summary-card strong { color: var(--d-ink); font-family: 'Montserrat', 'Segoe UI', sans-serif; font-weight: 800; }
+body[data-page] .summary-label { color: var(--d-muted); }
+
+/* Records, accounts, admin action boxes */
+body[data-page] .record-card,
+body[data-page] .account-item {
+  padding: 20px 22px; border-radius: 20px; border: 1px solid var(--d-field-border); background: var(--record-bg);
+}
+body[data-page] .record-card h4 { color: var(--d-ink); font-family: 'Montserrat', 'Segoe UI', sans-serif; font-weight: 700; }
+body[data-page] .admin-action-box,
+body[data-page] .response-box,
+body[data-page] .history-list { border-radius: 16px; }
+body[data-page] .admin-action-box select,
+body[data-page] .admin-action-box input,
+body[data-page] .admin-action-box textarea,
+body[data-page] .filter-bar input,
+body[data-page] .filter-bar select { border-radius: 14px; }
+
+/* Tags and status badges as pills */
+body[data-page] .tag,
+body[data-page] .status-badge { border-radius: 999px; padding: 5px 14px; font-weight: 700; }
+
+/* Reset-password modal */
+body[data-page] .modal-card { border-radius: 28px; border: 1px solid var(--d-field-border); box-shadow: 0 30px 70px rgba(27, 21, 96, 0.3); }
+body[data-page] .modal-header h3 { color: var(--d-ink); font-family: 'Montserrat', 'Segoe UI', sans-serif; font-weight: 800; }
+body[data-page] .modal-card .btn.primary { width: 100%; }
+
+@media (max-width: 640px) {
+  body[data-page] .header-bar { padding: 20px; border-radius: 22px; flex-wrap: wrap; gap: 14px; }
+  body[data-page] .card { padding: 22px 18px; border-radius: 22px; }
+  body[data-page] .dashboard-menu { border-radius: 22px; }
+}
+
+/* Brand block removed: keep the theme button on the right */
+body[data-page] .view-switcher { justify-content: flex-end; }
