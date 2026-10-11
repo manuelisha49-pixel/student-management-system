@@ -1728,3 +1728,6 @@ body[data-page] .modal-card .btn.primary { width: 100%; }
 
 /* Brand block removed: keep the theme button on the right */
 body[data-page] .view-switcher { justify-content: flex-end; }
+
+/* Longer sign-in heading: slightly smaller so 3 lines fit the picture panel */
+.auth-visual h2 { font-size: clamp(1.3rem, 2.1vw, 1.9rem); }
