@@ -644,8 +644,8 @@ function setupStudentHandlers() {
     const details = document.getElementById('concernDetails').value.trim();
     const attachmentInput = document.getElementById('concernAttachment');
 
-    if (!title || !details) {
-      alert('Please provide a title and detailed description for your submission.');
+    if (!details) {
+      alert('Please provide the details of your submission.');
       return;
     }
 
@@ -657,7 +657,7 @@ function setupStudentHandlers() {
       studentName: getUserFullName(currentUser),
       type: document.getElementById('concernType').value,
       category: document.getElementById('concernCategory').value,
-      title: title,
+      title: title || `No title (${document.getElementById('concernType').value})`,
       details: details,
       status: 'Pending',
       response: '',
