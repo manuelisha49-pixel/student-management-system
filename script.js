@@ -33,6 +33,45 @@ function formatDate(value) {
   return date.toLocaleString();
 }
 
+// Pure-JS SHA-256, used when the browser blocks crypto.subtle (e.g. plain http:// on a network address)
+function sha256Fallback(str) {
+  const bytes = Array.from(new TextEncoder().encode(str));
+  const K = [];
+  const H = [0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19];
+  const isPrime = (n) => { for (let i = 2; i * i <= n; i += 1) if (n % i === 0) return false; return true; };
+  for (let n = 2, c = 0; c < 64; n += 1) {
+    if (isPrime(n)) { K[c] = Math.floor((n ** (1 / 3) % 1) * 4294967296) >>> 0; c += 1; }
+  }
+  const bitLen = bytes.length * 8;
+  bytes.push(0x80);
+  while (bytes.length % 64 !== 56) bytes.push(0);
+  for (let i = 7; i >= 0; i -= 1) bytes.push(i >= 4 ? 0 : (bitLen >>> (i * 8)) & 0xff);
+  const rotr = (x, n) => (x >>> n) | (x << (32 - n));
+  for (let off = 0; off < bytes.length; off += 64) {
+    const w = new Array(64);
+    for (let i = 0; i < 16; i += 1) {
+      w[i] = ((bytes[off + i * 4] << 24) | (bytes[off + i * 4 + 1] << 16) | (bytes[off + i * 4 + 2] << 8) | bytes[off + i * 4 + 3]) >>> 0;
+    }
+    for (let i = 16; i < 64; i += 1) {
+      const s0 = rotr(w[i - 15], 7) ^ rotr(w[i - 15], 18) ^ (w[i - 15] >>> 3);
+      const s1 = rotr(w[i - 2], 17) ^ rotr(w[i - 2], 19) ^ (w[i - 2] >>> 10);
+      w[i] = (w[i - 16] + s0 + w[i - 7] + s1) >>> 0;
+    }
+    let [a, b, c, d, e, f, g, h] = H;
+    for (let i = 0; i < 64; i += 1) {
+      const S1 = rotr(e, 6) ^ rotr(e, 11) ^ rotr(e, 25);
+      const ch = (e & f) ^ (~e & g);
+      const t1 = (h + S1 + ch + K[i] + w[i]) >>> 0;
+      const S0 = rotr(a, 2) ^ rotr(a, 13) ^ rotr(a, 22);
+      const maj = (a & b) ^ (a & c) ^ (b & c);
+      const t2 = (S0 + maj) >>> 0;
+      h = g; g = f; f = e; e = (d + t1) >>> 0; d = c; c = b; b = a; a = (t1 + t2) >>> 0;
+    }
+    [a, b, c, d, e, f, g, h].forEach((v, i) => { H[i] = (H[i] + v) >>> 0; });
+  }
+  return H.map((v) => v.toString(16).padStart(8, '0')).join('');
+}
+
 async function hashPassword(value) {
   const text = String(value || '');
   if (window.crypto && crypto.subtle) {
@@ -40,12 +79,7 @@ async function hashPassword(value) {
     const digest = await crypto.subtle.digest('SHA-256', encoded);
     return Array.from(new Uint8Array(digest)).map((byte) => byte.toString(16).padStart(2, '0')).join('');
   }
-
-  let hash = 0;
-  for (let i = 0; i < text.length; i += 1) {
-    hash = (hash * 31 + text.charCodeAt(i)) >>> 0;
-  }
-  return hash.toString(16).padStart(8, '0');
+  return sha256Fallback(text);
 }
 
 async function authenticateAdmin(adminId, password) {
