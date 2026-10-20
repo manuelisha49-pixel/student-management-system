@@ -4,7 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Student Portal | Student Complaint &amp; Equipment Reporting System</title>
-  <link rel="stylesheet" href="styles.css?v=5">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css?v=6">
 
   <!-- EmailJS SDK Integration -->
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
@@ -29,7 +32,10 @@
         <span class="auth-crest" aria-hidden="true">
           <svg viewBox="12 12 56 56" width="84" height="84" xmlns="http://www.w3.org/2000/svg"><rect x="14" y="14" width="52" height="52" rx="16" fill="#fff" fill-opacity="0.16"/><path d="M31 28.5C31 25.4624 33.4624 23 36.5 23H45C51.6274 23 57 28.3726 57 35V36.5C57 43.1274 51.6274 48.5 45 48.5H37.5V53.5H49.5V58.5H37.5V63.5H31V58.5H24V53.5H31V48.5H36.5C33.4624 48.5 31 46.0376 31 43V28.5Z" fill="#fff"/><circle cx="26.5" cy="48.5" r="2.5" fill="#fff"/></svg>
         </span>
-        <h2>STUDENT MANAGEMENT<br>SYSTEM</h2>
+        <div>
+          <h2>STUDENT MANAGEMENT<br>SYSTEM</h2>
+          <p class="auth-tagline">Report a problem. Track the fix.</p>
+        </div>
       </aside>
 
       <div class="auth-center">
@@ -199,12 +205,12 @@
       <form id="requestOtpForm">
         <label>Enter Registered ID Number</label>
         <input type="text" id="resetStudentId" placeholder="e.g. 2025-0461" required>
-        <button type="submit" id="sendOtpBtn" class="btn primary" style="margin-top: 10px;">Send Verification Code to Gmail</button>
+        <button type="submit" id="sendOtpBtn" class="btn primary">Send Verification Code to Gmail</button>
       </form>
 
       <!-- Step 2: Verify OTP & Change Password -->
-      <form id="verifyOtpForm" class="hidden" style="margin-top: 15px;">
-        <p class="subtitle" style="color: #2563eb;">An OTP code was sent to your Gmail!</p>
+      <form id="verifyOtpForm" class="hidden">
+        <p class="modal-note">An OTP code was sent to your Gmail!</p>
         
         <label>Enter Verification Code</label>
         <input type="text" id="otpInput" placeholder="6-digit code" required>
@@ -212,7 +218,7 @@
         <label>New Password</label>
         <input type="password" id="resetNewPassword" placeholder="Enter new password" required>
 
-        <button type="submit" class="btn primary" style="margin-top: 10px;">Update Password</button>
+        <button type="submit" class="btn primary">Update Password</button>
       </form>
     </div>
   </div>
