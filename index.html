@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=9">
+  <link rel="stylesheet" href="styles.css?v=10">
 
   <!-- EmailJS SDK Integration -->
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
@@ -38,6 +38,7 @@
         </div>
       </aside>
 
+      <div class="auth-stage"><div class="auth-card">
       <div class="auth-center">
         <!-- Login Form -->
         <form id="studentLoginForm" class="auth-form">
@@ -51,6 +52,7 @@
           <a href="#" id="forgotPasswordLink" class="forgot-link">Forgot password?</a>
 
           <button type="submit" class="auth-submit">Sign in</button>
+          <p class="auth-hint">Admins sign in here too.</p>
         </form>
 
         <!-- Register Form -->
@@ -77,6 +79,9 @@
           <label for="regPassword">Password</label>
           <input type="password" id="regPassword" autocomplete="new-password" required>
 
+          <label for="regConfirmPassword">Confirm Password</label>
+          <input type="password" id="regConfirmPassword" autocomplete="new-password" required>
+
           <button type="submit" class="auth-submit auth-submit-gap">Create Account</button>
         </form>
       </div>
@@ -89,12 +94,13 @@
           <button id="registerTab" class="ghost-btn" type="button">Sign up</button>
         </div>
         <div class="side-block side-register">
-          <h2>Hello,<br>Student!</h2>
-          <p>Register with your ID Number and Gmail to start reporting.</p>
+          <h2>Hi NC<br>Students!</h2>
+          <p>Sign up once, then raise concerns about a teacher, student, or damaged facility.</p>
           <p class="side-ask">Already have an account?</p>
           <button id="loginTab" class="ghost-btn" type="button">Sign in</button>
         </div>
       </aside>
+    </div></div>
     </section>
 
     <!-- ================= STUDENT DASHBOARD ================= -->
@@ -223,6 +229,9 @@
     </div>
   </div>
 
+  <script>
+(function(){var p=document.getElementById("regPassword"),c=document.getElementById("regConfirmPassword");function chk(){c.setCustomValidity(c.value&&c.value!==p.value?"Passwords do not match":"")}p.addEventListener("input",chk);c.addEventListener("input",chk);})();
+</script>
   <script src="script.js?v=4"></script>
 </body>
 </html>
