@@ -1,18 +1,19 @@
-// Data Persistence Models
-let users = JSON.parse(localStorage.getItem('sys_users')) || [];
-let concerns = JSON.parse(localStorage.getItem('sys_concerns')) || [];
-let equipmentReports = JSON.parse(localStorage.getItem('sys_equipment')) || [];
-let currentUser = JSON.parse(localStorage.getItem('sys_current_user')) || null;
+// ----------------------------------------------------
+// Backend connection
+// ----------------------------------------------------
+// Address of the Node/Express server (server.js).
+// Testing on your own computer:  http://localhost:3000/api
+// After you put the backend online, replace it with the public URL, e.g. https://your-app.onrender.com/api
+const API_URL = 'http://localhost:3000/api';
 
-// Admin accounts (sign in with ID Number, e.g. ADMIN-001, + password). Passwords are stored as SHA-256 hashes.
-const ADMIN_ACCOUNTS = [
-  { id: 'ADMIN-001', name: 'System Administrator',   passwordHash: 'ac1943286401ef7bf3e0609032171386b2265952f5000f3fc246bbab7c6021ae' },
-  { id: 'ADMIN-002', name: 'Facilities Officer',      passwordHash: 'c9cd6f5607e1a10ff89357f8655c2f51ae9cc9c23017da7f8abda8bcfd53444c' },
-  { id: 'ADMIN-003', name: 'Student Affairs Officer', passwordHash: '47cfbe6c19f6e9bd7ad7e9f1e8a9d16a49bca2fa01a900db523a304a8812ad66' }
-];
-let currentAdminId = localStorage.getItem('sys_admin_current') || null;
-let isAdminLoggedIn = (JSON.parse(localStorage.getItem('sys_admin_logged_in')) || false) &&
-  ADMIN_ACCOUNTS.some((a) => a.id === currentAdminId);
+// Records now live in MySQL. The browser only remembers who is signed in.
+let users = [];
+let concerns = [];
+let equipmentReports = [];
+let currentUser = readStored('sys_current_user');
+let currentAdmin = readStored('sys_admin'); // { id, name }
+let authToken = localStorage.getItem('sys_token') || null;
+let isAdminLoggedIn = !!(authToken && currentAdmin);
 
 // Global OTP state for password reset
 let activeOtpData = null;
@@ -21,6 +22,15 @@ let activeOtpData = null;
 const EMAILJS_PUBLIC_KEY = "vW4AkyFPFlHOLpayJ";
 const EMAILJS_SERVICE_ID = "YOUR_SERVICE_ID";   // Replace with EmailJS Service ID
 const EMAILJS_TEMPLATE_ID = "YOUR_TEMPLATE_ID"; // Replace with EmailJS Template ID
+
+function readStored(key) {
+  try {
+    return JSON.parse(localStorage.getItem(key));
+  } catch (e) {
+    return null;
+  }
+}
+
 
 function normalizeText(value = '') {
   return String(value).trim();
@@ -31,79 +41,6 @@ function formatDate(value) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
   return date.toLocaleString();
-}
-
-// Pure-JS SHA-256, used when the browser blocks crypto.subtle (e.g. plain http:// on a network address)
-function sha256Fallback(str) {
-  const bytes = Array.from(new TextEncoder().encode(str));
-  const K = [];
-  const H = [0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19];
-  const isPrime = (n) => { for (let i = 2; i * i <= n; i += 1) if (n % i === 0) return false; return true; };
-  for (let n = 2, c = 0; c < 64; n += 1) {
-    if (isPrime(n)) { K[c] = Math.floor((n ** (1 / 3) % 1) * 4294967296) >>> 0; c += 1; }
-  }
-  const bitLen = bytes.length * 8;
-  bytes.push(0x80);
-  while (bytes.length % 64 !== 56) bytes.push(0);
-  for (let i = 7; i >= 0; i -= 1) bytes.push(i >= 4 ? 0 : (bitLen >>> (i * 8)) & 0xff);
-  const rotr = (x, n) => (x >>> n) | (x << (32 - n));
-  for (let off = 0; off < bytes.length; off += 64) {
-    const w = new Array(64);
-    for (let i = 0; i < 16; i += 1) {
-      w[i] = ((bytes[off + i * 4] << 24) | (bytes[off + i * 4 + 1] << 16) | (bytes[off + i * 4 + 2] << 8) | bytes[off + i * 4 + 3]) >>> 0;
-    }
-    for (let i = 16; i < 64; i += 1) {
-      const s0 = rotr(w[i - 15], 7) ^ rotr(w[i - 15], 18) ^ (w[i - 15] >>> 3);
-      const s1 = rotr(w[i - 2], 17) ^ rotr(w[i - 2], 19) ^ (w[i - 2] >>> 10);
-      w[i] = (w[i - 16] + s0 + w[i - 7] + s1) >>> 0;
-    }
-    let [a, b, c, d, e, f, g, h] = H;
-    for (let i = 0; i < 64; i += 1) {
-      const S1 = rotr(e, 6) ^ rotr(e, 11) ^ rotr(e, 25);
-      const ch = (e & f) ^ (~e & g);
-      const t1 = (h + S1 + ch + K[i] + w[i]) >>> 0;
-      const S0 = rotr(a, 2) ^ rotr(a, 13) ^ rotr(a, 22);
-      const maj = (a & b) ^ (a & c) ^ (b & c);
-      const t2 = (S0 + maj) >>> 0;
-      h = g; g = f; f = e; e = (d + t1) >>> 0; d = c; c = b; b = a; a = (t1 + t2) >>> 0;
-    }
-    [a, b, c, d, e, f, g, h].forEach((v, i) => { H[i] = (H[i] + v) >>> 0; });
-  }
-  return H.map((v) => v.toString(16).padStart(8, '0')).join('');
-}
-
-async function hashPassword(value) {
-  const text = String(value || '');
-  if (window.crypto && crypto.subtle) {
-    const encoded = new TextEncoder().encode(text);
-    const digest = await crypto.subtle.digest('SHA-256', encoded);
-    return Array.from(new Uint8Array(digest)).map((byte) => byte.toString(16).padStart(2, '0')).join('');
-  }
-  return sha256Fallback(text);
-}
-
-async function authenticateAdmin(adminId, password) {
-  const normalizedId = normalizeText(adminId).toUpperCase();
-  const account = ADMIN_ACCOUNTS.find((a) => a.id === normalizedId);
-  if (!account) {
-    return null;
-  }
-
-  const hash = await hashPassword(password);
-  return account.passwordHash === hash ? account : null;
-}
-
-function addHistoryEntry(record, action, details = '') {
-  if (!record) return;
-  if (!Array.isArray(record.history)) {
-    record.history = [];
-  }
-
-  record.history.push({
-    action,
-    details,
-    at: new Date().toISOString()
-  });
 }
 
 function renderAttachmentPreview(attachments = []) {
@@ -180,32 +117,110 @@ async function processSelectedFiles(fileInput) {
   }
 })();
 
+// ----------------------------------------------------
+// Session + server helpers
+// ----------------------------------------------------
+function saveSession() {
+  const store = (key, value) => (value ? localStorage.setItem(key, JSON.stringify(value)) : localStorage.removeItem(key));
+  store('sys_current_user', currentUser);
+  store('sys_admin', currentAdmin);
+  if (authToken) localStorage.setItem('sys_token', authToken);
+  else localStorage.removeItem('sys_token');
+}
+
+function clearSession() {
+  authToken = null;
+  currentUser = null;
+  currentAdmin = null;
+  isAdminLoggedIn = false;
+  users = [];
+  concerns = [];
+  equipmentReports = [];
+  saveSession();
+}
+
+function startStudentSession(data) {
+  authToken = data.token;
+  currentUser = data.user;
+  currentAdmin = null;
+  isAdminLoggedIn = false;
+  saveSession();
+}
+
+function handleExpiredSession() {
+  clearSession();
+  if (document.body.dataset.page === 'admin') {
+    window.location.replace('index.html');
+  } else {
+    updateUIState();
+  }
+}
+
+async function api(path, options = {}) {
+  const headers = { 'Content-Type': 'application/json' };
+  if (authToken) headers.Authorization = `Bearer ${authToken}`;
+
+  let res;
+  try {
+    res = await fetch(`${API_URL}${path}`, {
+      method: options.method || 'GET',
+      headers,
+      body: options.body ? JSON.stringify(options.body) : undefined
+    });
+  } catch (e) {
+    throw new Error('Cannot reach the server. Make sure the backend is running (npm start).');
+  }
+
+  let data = {};
+  try {
+    data = await res.json();
+  } catch (e) {
+    data = {};
+  }
+
+  const isLoginCall = path === '/login' || path === '/admin/login';
+  if (res.status === 401 && authToken && !isLoginCall) {
+    handleExpiredSession();
+    throw new Error('Your session expired. Please sign in again.');
+  }
+  if (!res.ok) throw new Error(data.error || 'Something went wrong. Please try again.');
+  return data;
+}
+
+// Loads this person's records (students) or everything (admins) from the server
+async function loadState() {
+  const data = await api('/state');
+  concerns = data.concerns || [];
+  equipmentReports = data.equipment || [];
+  users = data.users || [];
+}
+
+async function refreshData() {
+  try {
+    await loadState();
+  } catch (err) {
+    alert(err.message);
+  }
+}
+
 // Initialize Application
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   setupThemeToggle();
   loadCrest();
   setupPasswordToggles();
   if (document.body.dataset.page === 'admin') {
     setupAdminHandlers();
+    if (isAdminLoggedIn) await refreshData();
     updateAdminUIState();
   } else {
     setupAuthHandlers();
     setupResetPasswordHandlers();
     setupStudentHandlers();
+    if (currentUser) await refreshData();
     updateUIState();
   }
 });
 
-// Save Helper
-function saveData() {
-  localStorage.setItem('sys_users', JSON.stringify(users));
-  localStorage.setItem('sys_concerns', JSON.stringify(concerns));
-  localStorage.setItem('sys_equipment', JSON.stringify(equipmentReports));
-  localStorage.setItem('sys_current_user', JSON.stringify(currentUser));
-  localStorage.setItem('sys_admin_logged_in', JSON.stringify(isAdminLoggedIn));
-  if (currentAdminId) localStorage.setItem('sys_admin_current', currentAdminId);
-  else localStorage.removeItem('sys_admin_current');
-}
 
 function escapeHtml(value = '') {
   return String(value)
@@ -373,8 +388,7 @@ function updateAdminUIState() {
 
   document.getElementById('adminDashboard').classList.remove('hidden');
   const whoami = document.getElementById('adminWhoami');
-  const account = ADMIN_ACCOUNTS.find((a) => a.id === currentAdminId);
-  if (whoami && account) whoami.textContent = `Signed in as ${account.name} (${account.id})`;
+  if (whoami && currentAdmin) whoami.textContent = `Signed in as ${currentAdmin.name} (${currentAdmin.id})`;
 
   renderAdminEquipment();
   renderAdminConcerns();
@@ -401,7 +415,7 @@ function setupAuthHandlers() {
   registerTab.addEventListener('click', () => setAuthMode('register'));
 
   // Register Student
-  regForm.addEventListener('submit', (e) => {
+  regForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const firstName = document.getElementById('regFirstName').value.trim();
     const lastName = document.getElementById('regLastName').value.trim();
@@ -436,15 +450,18 @@ function setupAuthHandlers() {
       return;
     }
 
-    if (users.find(u => u.studentId === studentId || u.email.toLowerCase() === email.toLowerCase())) {
-      alert('An account with this ID Number or Gmail address already exists.');
+    const submitBtn = regForm.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    try {
+      const data = await api('/register', { method: 'POST', body: { firstName, lastName, studentId, email, password } });
+      startStudentSession(data);
+    } catch (err) {
+      alert(err.message);
+      submitBtn.disabled = false;
       return;
     }
-
-    const newUser = { id: Date.now(), firstName, lastName, studentId, email, password };
-    users.push(newUser);
-    currentUser = newUser;
-    saveData();
+    submitBtn.disabled = false;
+    await refreshData();
     updateUIState();
     regForm.reset();
   });
@@ -454,40 +471,39 @@ function setupAuthHandlers() {
     e.preventDefault();
     const idNumber = document.getElementById('loginStudentId').value.trim();
     const password = document.getElementById('loginPassword').value;
+    const submitBtn = loginForm.querySelector('button[type="submit"]');
 
-    // Admin IDs look like ADMIN-001
-    if (/^admin-/i.test(idNumber)) {
-      const account = await authenticateAdmin(idNumber, password);
-      if (!account) {
-        alert('Invalid ID or password!');
+    submitBtn.disabled = true;
+    try {
+      // Admin IDs look like ADMIN-001
+      if (/^admin-/i.test(idNumber)) {
+        const data = await api('/admin/login', { method: 'POST', body: { adminId: idNumber, password } });
+        authToken = data.token;
+        currentAdmin = data.admin;
+        currentUser = null;
+        isAdminLoggedIn = true;
+        saveSession();
+        window.location.href = 'admin.html';
         return;
       }
-      isAdminLoggedIn = true;
-      currentAdminId = account.id;
-      currentUser = null;
-      saveData();
-      window.location.href = 'admin.html';
+
+      const data = await api('/login', { method: 'POST', body: { studentId: idNumber, password } });
+      startStudentSession(data);
+    } catch (err) {
+      alert(err.message);
+      submitBtn.disabled = false;
       return;
     }
-
-    const user = users.find(u => u.studentId === idNumber && u.password === password);
-    if (user) {
-      isAdminLoggedIn = false;
-      currentAdminId = null;
-      currentUser = user;
-      saveData();
-      updateUIState();
-      loginForm.reset();
-    } else {
-      alert('Invalid ID or password!');
-    }
+    submitBtn.disabled = false;
+    await refreshData();
+    updateUIState();
+    loginForm.reset();
   });
 
   // Student Logout
   document.getElementById('studentLogoutBtn').addEventListener('click', () => {
-    currentUser = null;
+    clearSession();
     setAuthMode('login');
-    saveData();
     updateUIState();
   });
 }
@@ -516,14 +532,17 @@ function setupResetPasswordHandlers() {
     verifyOtpForm.reset();
   });
 
-  // Step 1: Handle OTP Generation & Email Sending
-  requestOtpForm.addEventListener('submit', (e) => {
+  // Step 1: Find the account, then generate the OTP and email it
+  requestOtpForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const studentId = document.getElementById('resetStudentId').value.trim();
-    const targetUser = users.find(u => u.studentId === studentId);
 
-    if (!targetUser) {
-      alert('No account found with that ID Number!');
+    let targetUser;
+    try {
+      const data = await api(`/users/lookup?studentId=${encodeURIComponent(studentId)}`);
+      targetUser = data.user;
+    } catch (err) {
+      alert(err.message === 'No account found' ? 'No account found with that ID Number!' : err.message);
       return;
     }
 
@@ -545,7 +564,7 @@ function setupResetPasswordHandlers() {
 
     window.emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
         to_email: targetUser.email,
-        to_name: getUserFullName(targetUser),
+        to_name: 'Student',
         otp_code: generatedOtp
       })
       .then(() => {
@@ -569,8 +588,8 @@ function setupResetPasswordHandlers() {
       });
   });
 
-  // Step 2: Verify Code and Update Password
-  verifyOtpForm.addEventListener('submit', (e) => {
+  // Step 2: Verify Code and save the new password on the server
+  verifyOtpForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const inputOtp = document.getElementById('otpInput').value.trim();
     const newPassword = document.getElementById('resetNewPassword').value;
@@ -585,16 +604,23 @@ function setupResetPasswordHandlers() {
       return;
     }
 
-    const userIndex = users.findIndex(u => u.studentId === activeOtpData.studentId);
-    if (userIndex !== -1) {
-      users[userIndex].password = newPassword;
-      saveData();
-      alert('Password updated successfully! You can now log in.');
-      resetModal.classList.add('hidden');
-      requestOtpForm.reset();
-      verifyOtpForm.reset();
-      activeOtpData = null;
+    if (newPassword.length < 6) {
+      alert('Password must be at least 6 characters long.');
+      return;
     }
+
+    try {
+      await api('/reset-password', { method: 'POST', body: { studentId: activeOtpData.studentId, newPassword } });
+    } catch (err) {
+      alert(err.message);
+      return;
+    }
+
+    alert('Password updated successfully! You can now log in.');
+    resetModal.classList.add('hidden');
+    requestOtpForm.reset();
+    verifyOtpForm.reset();
+    activeOtpData = null;
   });
 }
 
@@ -670,13 +696,19 @@ function setupStudentHandlers() {
       createdAt: new Date().toISOString()
     };
 
-    concerns.push(newConcern);
-    saveData();
+    const submitBtn = concernForm.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    try {
+      await api('/concerns', { method: 'POST', body: newConcern });
+      await loadState();
+    } catch (err) {
+      alert(err.message);
+      return;
+    } finally {
+      submitBtn.disabled = false;
+    }
     renderStudentConcerns();
     renderDashboardSummary();
-    if (typeof renderAdminConcerns === 'function') {
-      renderAdminConcerns();
-    }
     concernForm.reset();
     alert('Concern submitted successfully!');
   });
@@ -713,13 +745,19 @@ function setupStudentHandlers() {
       createdAt: new Date().toISOString()
     };
 
-    equipmentReports.push(newReport);
-    saveData();
+    const submitBtn = equipmentForm.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    try {
+      await api('/equipment', { method: 'POST', body: newReport });
+      await loadState();
+    } catch (err) {
+      alert(err.message);
+      return;
+    } finally {
+      submitBtn.disabled = false;
+    }
     renderStudentEquipment();
     renderDashboardSummary();
-    if (typeof renderAdminEquipment === 'function') {
-      renderAdminEquipment();
-    }
     equipmentForm.reset();
     alert('Equipment report submitted to maintenance!');
   });
@@ -811,9 +849,7 @@ function setupAdminHandlers() {
   });
 
   document.getElementById('adminLogoutBtn').addEventListener('click', () => {
-    isAdminLoggedIn = false;
-    currentAdminId = null;
-    saveData();
+    clearSession();
     window.location.href = 'index.html';
   });
 
@@ -948,7 +984,7 @@ function renderAccountsList() {
     item.innerHTML = `
       <div>
         <strong>${escapeHtml(getUserFullName(u))}</strong> (${escapeHtml(u.studentId)})
-        <div class="subtitle" style="margin:0;">${u.email}</div>
+        <div class="subtitle" style="margin:0;">${escapeHtml(u.email)}</div>
       </div>
     `;
     container.appendChild(item);
@@ -956,41 +992,66 @@ function renderAccountsList() {
 }
 
 // Global Actions for Admin Updates
-window.updateEquipmentStatus = function(id, status) {
+// (The server stores the status and also writes the history entry.)
+window.updateEquipmentStatus = async function(id, status) {
   const target = equipmentReports.find(e => e.id === id);
-  if (target && target.status !== status) {
-    target.status = status;
-    addHistoryEntry(target, 'Status Updated', `Equipment moved to ${status}.`);
-    saveData();
-    renderAdminEquipment();
-    renderDashboardSummary();
-    if (currentUser) renderStudentEquipment();
+  if (!target || target.status === status) return;
+
+  try {
+    await api(`/equipment/${id}`, {
+      method: 'PATCH',
+      body: { status, history: { action: 'Status Updated', details: `Equipment moved to ${status}.` } }
+    });
+    await loadState();
+  } catch (err) {
+    alert(err.message);
   }
+  renderAdminEquipment();
+  renderDashboardSummary();
 };
 
-window.updateConcernStatus = function(id, status) {
+window.updateConcernStatus = async function(id, status) {
   const target = concerns.find(c => c.id === id);
-  if (target && target.status !== status) {
-    target.status = status;
-    addHistoryEntry(target, 'Status Updated', `Submission moved to ${status}.`);
-    saveData();
-    renderAdminConcerns();
-    renderDashboardSummary();
-    if (currentUser) renderStudentConcerns();
+  if (!target || target.status === status) return;
+
+  try {
+    // The server saves status and response together, so send the current response too.
+    await api(`/concerns/${id}`, {
+      method: 'PATCH',
+      body: {
+        status,
+        response: target.response || '',
+        history: { action: 'Status Updated', details: `Submission moved to ${status}.` }
+      }
+    });
+    await loadState();
+  } catch (err) {
+    alert(err.message);
   }
+  renderAdminConcerns();
+  renderDashboardSummary();
 };
 
-window.saveAdminResponse = function(id) {
+window.saveAdminResponse = async function(id) {
   const target = concerns.find(c => c.id === id);
   const respInput = document.getElementById(`resp-${id}`);
-  if (target && respInput) {
-    const nextResponse = respInput.value.trim();
-    target.response = nextResponse;
-    addHistoryEntry(target, 'Admin Response', 'Official response was added or updated.');
-    saveData();
-    alert('Admin response saved!');
-    renderAdminConcerns();
-    renderDashboardSummary();
-    if (currentUser) renderStudentConcerns();
+  if (!target || !respInput) return;
+
+  try {
+    await api(`/concerns/${id}`, {
+      method: 'PATCH',
+      body: {
+        status: target.status,
+        response: respInput.value.trim(),
+        history: { action: 'Admin Response', details: 'Official response was added or updated.' }
+      }
+    });
+    await loadState();
+  } catch (err) {
+    alert(err.message);
+    return;
   }
+  alert('Admin response saved!');
+  renderAdminConcerns();
+  renderDashboardSummary();
 };
