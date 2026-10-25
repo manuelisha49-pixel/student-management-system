@@ -313,3 +313,12 @@ body:not(.auth-mode) .view-switcher{position:fixed;right:18px;bottom:18px;z-inde
 body.dark-mode{--nm-bg:#080808;--nm-light:#1d1d1d;--nm-dark:#000}
 body:not(.auth-mode){background:#fff}
 body.dark-mode:not(.auth-mode){background:#000}
+
+/* theme toggle: back to the original look and position */
+body:not(.auth-mode) .view-switcher{position:static;z-index:auto;margin:0 auto 12px}
+.view-switcher{max-width:1080px;margin:0 auto 12px}
+.view-switcher button{padding:6px 12px;border:1px solid var(--line);border-radius:3px;background:var(--card);color:var(--ink);font-size:.85rem;font-weight:400;box-shadow:none}
+.view-switcher button:hover{background:var(--tint)}
+.theme-fab{top:16px;right:16px;width:36px;height:36px;border:1px solid var(--line);border-radius:3px;background:var(--card);box-shadow:none}
+.theme-fab:hover{background:var(--tint)}
+.theme-fab svg{width:18px;height:18px}
