@@ -6,9 +6,9 @@ let currentUser = JSON.parse(localStorage.getItem('sys_current_user')) || null;
 
 // Admin accounts (sign in with ID Number, e.g. ADMIN-001, + password). Passwords are stored as SHA-256 hashes.
 const ADMIN_ACCOUNTS = [
-  { id: 'ADMIN-001', name: 'System Administrator',   passwordHash: 'admin123' },
-  { id: 'ADMIN-002', name: 'Facilities Officer',      passwordHash: 'admin456' },
-  { id: 'ADMIN-003', name: 'Student Affairs Officer', passwordHash: 'admin789' }
+  { id: 'ADMIN-001', name: 'System Administrator',   passwordHash: 'ac1943286401ef7bf3e0609032171386b2265952f5000f3fc246bbab7c6021ae' },
+  { id: 'ADMIN-002', name: 'Facilities Officer',      passwordHash: 'c9cd6f5607e1a10ff89357f8655c2f51ae9cc9c23017da7f8abda8bcfd53444c' },
+  { id: 'ADMIN-003', name: 'Student Affairs Officer', passwordHash: '47cfbe6c19f6e9bd7ad7e9f1e8a9d16a49bca2fa01a900db523a304a8812ad66' }
 ];
 let currentAdminId = localStorage.getItem('sys_admin_current') || null;
 let isAdminLoggedIn = (JSON.parse(localStorage.getItem('sys_admin_logged_in')) || false) &&
