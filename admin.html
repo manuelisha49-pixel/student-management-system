@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=12">
+  <link rel="stylesheet" href="styles.css?v=13">
 </head>
 <body data-page="admin">
 
@@ -19,21 +19,22 @@
 
     <!-- Admins sign in on the main login page (index.html) -->
     <section id="adminDashboard" class="hidden">
-      <div class="header-bar">
-        <div class="workspace-heading">
-          <span class="portal-eyebrow">Operations workspace</span>
-          <h2>Admin Control Center</h2>
-          <p id="adminWhoami" class="admin-whoami"></p>
-        </div>
-        <button id="adminLogoutBtn" class="btn secondary" type="button">Logout</button>
-      </div>
-
-      <nav class="dashboard-menu" aria-label="Admin dashboard menu">
+      <header class="topbar">
+        <div class="brand"><span class="brand-logo" role="img" aria-label="School crest"></span><span class="brand-text"><strong>Admin Portal</strong><small>Complaint &amp; Equipment Reporting</small></span></div>
+        <nav class="dashboard-menu" aria-label="Admin dashboard menu">
         <button type="button" class="active" data-admin-view="overview" aria-controls="adminOverviewPanel" aria-pressed="true">Overview</button>
         <button type="button" data-admin-view="equipment" aria-controls="adminEquipmentPanel" aria-pressed="false">Equipment</button>
         <button type="button" data-admin-view="submissions" aria-controls="adminSubmissionsPanel" aria-pressed="false">Submissions</button>
         <button type="button" data-admin-view="accounts" aria-controls="adminAccountsPanel" aria-pressed="false">Accounts</button>
       </nav>
+        <button id="adminLogoutBtn" class="btn secondary" type="button">Logout</button>
+      </header>
+
+      <div class="page-head">
+        <span class="head-pill">Admin Dashboard</span>
+        <h2>Admin Control Center</h2>
+        <p id="adminWhoami" class="admin-whoami"></p>
+      </div>
 
       <section id="adminOverviewPanel" class="admin-view-panel" data-admin-panel="overview">
         <div id="adminSummaryGrid" class="summary-grid admin-summary-grid"></div>
