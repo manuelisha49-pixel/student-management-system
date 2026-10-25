@@ -7,13 +7,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=16">
+  <link rel="stylesheet" href="styles.css?v=17">
 </head>
 <body data-page="admin">
-
-  <div class="view-switcher">
-    <button id="themeToggleBtn" class="theme-btn" type="button">Dark Mode</button>
-  </div>
 
   <main class="auth-main">
 
@@ -27,6 +23,7 @@
         <button type="button" data-admin-view="submissions" aria-controls="adminSubmissionsPanel" aria-pressed="false">Submissions</button>
         <button type="button" data-admin-view="accounts" aria-controls="adminAccountsPanel" aria-pressed="false">Accounts</button>
       </nav>
+        <button id="themeToggleBtn" class="theme-btn" type="button" aria-label="Toggle light and dark mode"></button>
         <button id="adminLogoutBtn" class="btn secondary" type="button">Logout</button>
       </header>
 
