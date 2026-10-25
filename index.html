@@ -7,16 +7,12 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=16">
+  <link rel="stylesheet" href="styles.css?v=17">
 
   <!-- EmailJS SDK Integration -->
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 </head>
 <body data-page="student" class="auth-mode">
-
-  <div class="view-switcher">
-    <button id="themeToggleBtn" class="theme-btn" type="button">Dark Mode</button>
-  </div>
 
   <!-- Dark / light mode (shown on the sign-in screen) -->
   <button id="themeFab" class="theme-fab" type="button" aria-label="Switch to dark mode">
@@ -34,7 +30,7 @@
         </span>
         <div>
           <h2>STUDENT MANAGEMENT<br>SYSTEM</h2>
-          <p class="auth-tagline">Your Voice Matters. Every Feedback Counts.</p>
+          <p class="auth-tagline">Report a problem. Track the fix.</p>
         </div>
       </aside>
 
@@ -113,6 +109,7 @@
         <a href="#studentSubmitSection">Submit a report</a>
         <a href="#studentRecordsSection">My submissions</a>
       </nav>
+        <button id="themeToggleBtn" class="theme-btn" type="button" aria-label="Toggle light and dark mode"></button>
         <button id="studentLogoutBtn" class="btn secondary">Logout</button>
       </header>
 
@@ -162,10 +159,10 @@
         <!-- Submit Equipment Report Form -->
         <form id="equipmentForm" class="dashboard-form hidden">
           <label>Equipment Name / Item ID</label>
-          <input type="text" id="eqName" placeholder="e.g., PC, Air Conditioner, Internet" required>
+          <input type="text" id="eqName" placeholder="e.g., Projector 04, Air Conditioner, Lab Chair #12" required>
 
           <label>Location / Room Number</label>
-          <input type="text" id="eqLocation" placeholder="e.g., CLB, CS Building 2nd Floor" required>
+          <input type="text" id="eqLocation" placeholder="e.g., Room 302, Science Building 2nd Floor" required>
 
           <label>Urgency Level</label>
           <select id="eqUrgency" required>
