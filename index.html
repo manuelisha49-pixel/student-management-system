@@ -7,12 +7,17 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=17">
+  <link rel="stylesheet" href="styles.css?v=18">
 
   <!-- EmailJS SDK Integration -->
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 </head>
 <body data-page="student" class="auth-mode">
+
+  <div class="view-switcher">
+    <button id="themeToggleBtn" class="theme-btn" type="button">Dark Mode</button>
+  </div>
+
 
   <!-- Dark / light mode (shown on the sign-in screen) -->
   <button id="themeFab" class="theme-fab" type="button" aria-label="Switch to dark mode">
@@ -109,7 +114,6 @@
         <a href="#studentSubmitSection">Submit a report</a>
         <a href="#studentRecordsSection">My submissions</a>
       </nav>
-        <button id="themeToggleBtn" class="theme-btn" type="button" aria-label="Toggle light and dark mode"></button>
         <button id="studentLogoutBtn" class="btn secondary">Logout</button>
       </header>
 
