@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=12">
+  <link rel="stylesheet" href="styles.css?v=13">
 
   <!-- EmailJS SDK Integration -->
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
@@ -107,19 +107,21 @@
     <div id="studentSection" class="portal-container">
     <!-- Student Dashboard -->
     <div id="studentDashboard" class="hidden">
-      <div class="header-bar">
-        <div class="workspace-heading">
-          <span class="portal-eyebrow">Student workspace</span>
-          <h2>Welcome, <span id="studentNameDisplay">Student</span>!</h2>
-        </div>
-        <button id="studentLogoutBtn" class="btn secondary">Logout</button>
-      </div>
-
-      <nav class="dashboard-menu" aria-label="Student dashboard menu">
+      <header class="topbar">
+        <div class="brand"><span class="brand-logo" role="img" aria-label="School crest"></span><span class="brand-text"><strong>Student Portal</strong><small>Complaint &amp; Equipment Reporting</small></span></div>
+        <nav class="dashboard-menu" aria-label="Student dashboard menu">
         <a href="#studentSummaryGrid">Overview</a>
         <a href="#studentSubmitSection">Submit a report</a>
         <a href="#studentRecordsSection">My submissions</a>
       </nav>
+        <button id="studentLogoutBtn" class="btn secondary">Logout</button>
+      </header>
+
+      <div class="page-head">
+        <span class="head-pill">Student Dashboard</span>
+        <h2>Welcome, <span id="studentNameDisplay">Student</span>!</h2>
+        <p>Report a concern or broken equipment, then track every update here.</p>
+      </div>
 
       <div id="studentSummaryGrid" class="summary-grid"></div>
 
