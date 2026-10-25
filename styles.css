@@ -309,14 +309,8 @@ body:not(.auth-mode) .view-switcher{position:fixed;right:18px;bottom:18px;z-inde
   .page-head h2{font-size:1.6rem}
 }
 
-/* black & white: sign-in left photo and every dashboard (sign-in card keeps its colours) */
-.auth-visual{background:linear-gradient(rgba(0,0,0,.6),rgba(0,0,0,.6)),var(--photo) center/cover no-repeat,#777;background-blend-mode:normal,luminosity,normal}
-body:not(.auth-mode){--page:#f4f4f4;--card:#fff;--tint:#f0f0f0;--ink:#111;--muted:#666;--line:#d4d4d4;--line-soft:#e5e5e5;--field:#fff;--brand:#111;--brand-hover:#000;--brand-tint:#e8e8e8;--on-brand:#fff;--link:#111;--shadow:0 1px 2px rgba(0,0,0,.06),0 14px 30px -16px rgba(0,0,0,.3);background:linear-gradient(180deg,#e9e9e9,#f6f6f6 340px) no-repeat,var(--page)}
-body.dark-mode:not(.auth-mode){--page:#0b0b0b;--card:#151515;--tint:#1d1d1d;--ink:#f2f2f2;--muted:#a0a0a0;--line:#3a3a3a;--line-soft:#262626;--field:#0b0b0b;--brand:#f2f2f2;--brand-hover:#fff;--brand-tint:rgba(255,255,255,.12);--on-brand:#111;--link:#f2f2f2;background:linear-gradient(180deg,#1a1a1a,var(--page) 340px) no-repeat,var(--page)}
-html:has(body:not(.auth-mode)){filter:grayscale(1)}
-body[data-page] .summary-card:nth-child(n){--c:#555}
-body.dark-mode[data-page] .summary-card:nth-child(n){--c:#999}
-.card>h3::before{background:var(--ic-act) center/19px no-repeat,linear-gradient(135deg,#4a4a4a,#1c1c1c)}
-.btn.primary,.btn.primary:hover{box-shadow:0 6px 14px -8px rgba(0,0,0,.5)}
-.btn.primary{background:var(--brand)}
-.btn.primary:hover{background:var(--brand-hover)}
+/* white / black backgrounds only; navy and colour accents are kept */
+:root{--nm-bg:#fff;--nm-light:#fff;--nm-dark:#d3d7e0}
+body.dark-mode{--nm-bg:#080808;--nm-light:#1d1d1d;--nm-dark:#000}
+body:not(.auth-mode){background:#fff}
+body.dark-mode:not(.auth-mode){background:#000}
