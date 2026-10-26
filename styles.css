@@ -335,3 +335,6 @@ body.dark-mode .auth-stage{background:#000}
 
 /* dark mode on the sign-in page changes only the background; the card stays as in light mode */
 body.dark-mode .auth-card{--nm-bg:#e6ebf5;--nm-light:#fff;--nm-dark:#c1c9db;--ink:#151a2e;--muted:#5b6479;--line:#cfd4e1;--field:#fff;--card:#fff;--brand:#1d3b8b;--brand-hover:#142c6b;--brand-tint:#dfe7f8;--link:#1d3b8b;color:#151a2e;box-shadow:0 0 0 1px rgba(255,255,255,.1)}
+
+/* theme button sits inside the blue panel, top-right corner */
+.auth-side .theme-fab{position:absolute;top:14px;right:14px;z-index:5}
