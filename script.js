@@ -19,7 +19,7 @@ let isAdminLoggedIn = !!(authToken && currentAdmin);
 let activeOtpData = null;
 
 // EmailJS Credentials Configuration
-const EMAILJS_PUBLIC_KEY = "vW4AkyFPFlHOLpayJ";
+const EMAILJS_PUBLIC_KEY = "PpcSbMG_vVKbRDxHC";
 const EMAILJS_SERVICE_ID = "service_10exisd";
 const EMAILJS_TEMPLATE_ID = "template_7ygx9wb";
 
