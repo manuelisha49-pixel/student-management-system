@@ -344,3 +344,17 @@ body:not(.auth-mode) .topbar .view-switcher{position:static;display:flex;flex:0 
   body:not(.auth-mode) .topbar .view-switcher{margin-left:auto}
   .topbar .btn.secondary{margin-left:0}
 }
+
+/* photo viewer: click a photo to see it full size */
+.attachment-preview img{cursor:zoom-in}
+body.viewer-open{overflow:hidden}
+.photo-viewer{position:fixed;inset:0;z-index:2000;display:flex;align-items:center;justify-content:center;padding:56px 64px;background:rgba(0,0,0,.88)}
+.photo-viewer img{display:block;max-width:100%;max-height:100%;object-fit:contain;border-radius:8px;box-shadow:0 10px 40px rgba(0,0,0,.5)}
+.pv-btn{position:absolute;display:grid;place-items:center;width:44px;height:44px;padding:0;border:0;border-radius:50%;background:rgba(255,255,255,.16);color:#fff;font-size:30px;line-height:1;cursor:pointer}
+.pv-btn:hover{background:rgba(255,255,255,.3)}
+.pv-close{top:14px;right:14px}
+.pv-prev{left:12px;top:50%;transform:translateY(-50%)}
+.pv-next{right:12px;top:50%;transform:translateY(-50%)}
+.photo-viewer.single .pv-prev,.photo-viewer.single .pv-next{display:none}
+.pv-count{position:absolute;bottom:14px;left:0;right:0;text-align:center;color:#fff;font-size:.9rem}
+@media (max-width:600px){.photo-viewer{padding:56px 12px}.pv-prev{left:6px}.pv-next{right:6px}}
