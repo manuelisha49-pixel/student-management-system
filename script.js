@@ -784,7 +784,10 @@ function renderStudentConcerns() {
           <span class="tag ${escapeHtml(c.type)}">${escapeHtml(c.type)}</span>
           <strong style="margin-left: 8px;">${escapeHtml(c.title)}</strong>
         </div>
-        <span class="status-badge status-${c.status.replace(/\s+/g, '-')}">${escapeHtml(c.status)}</span>
+        <div class="record-actions">
+          <span class="status-badge status-${c.status.replace(/\s+/g, '-')}">${escapeHtml(c.status)}</span>
+          ${c.status === 'Pending' ? `<button type="button" class="btn-cancel" onclick="cancelSubmission('concern', ${c.id})">Cancel</button>` : ''}
+        </div>
       </div>
       <p style="font-size: 0.9rem; margin-top: 6px;">${escapeHtml(c.details)}</p>
       <div class="subtitle" style="margin-top: 6px;">Category: ${escapeHtml(c.category)} | Date: ${escapeHtml(formatDate(c.createdAt))}</div>
@@ -815,7 +818,10 @@ function renderStudentEquipment() {
           <span class="tag Equipment">Equipment</span>
           <strong style="margin-left: 8px;">${escapeHtml(eq.itemName)}</strong>
         </div>
-        <span class="status-badge status-${eq.status.replace(/\s+/g, '-')}">${escapeHtml(eq.status)}</span>
+        <div class="record-actions">
+          <span class="status-badge status-${eq.status.replace(/\s+/g, '-')}">${escapeHtml(eq.status)}</span>
+          ${eq.status === 'Reported' ? `<button type="button" class="btn-cancel" onclick="cancelSubmission('equipment', ${eq.id})">Cancel</button>` : ''}
+        </div>
       </div>
       <p style="font-size: 0.9rem; margin-top: 6px;"><strong>Location:</strong> ${escapeHtml(eq.location)}</p>
       <p style="font-size: 0.9rem; margin-top: 2px;"><strong>Issue:</strong> ${escapeHtml(eq.details)}</p>
@@ -1123,3 +1129,74 @@ window.saveAdminResponse = async function(id) {
     else if (e.key === 'ArrowRight') step(1);
   });
 })();
+
+
+// Cancel a submission (student side)
+// Shows a "are you sure?" popup first, then deletes the record on the server.
+function confirmCancel(kindLabel) {
+  return new Promise((resolve) => {
+    const overlay = document.createElement('div');
+    overlay.className = 'confirm-overlay';
+    overlay.setAttribute('role', 'dialog');
+    overlay.setAttribute('aria-modal', 'true');
+    overlay.setAttribute('aria-labelledby', 'confirmCancelTitle');
+    overlay.innerHTML = `
+      <div class="confirm-card">
+        <h3 id="confirmCancelTitle">Cancel this ${kindLabel}?</h3>
+        <p>Are you sure you want to cancel it? This will remove it and cannot be undone.</p>
+        <div class="confirm-actions">
+          <button type="button" class="btn secondary" data-confirm="no">No, keep it</button>
+          <button type="button" class="btn danger" data-confirm="yes">Yes, cancel it</button>
+        </div>
+      </div>
+    `;
+
+    function finish(answer) {
+      document.removeEventListener('keydown', onKey);
+      overlay.remove();
+      resolve(answer);
+    }
+    function onKey(e) {
+      if (e.key === 'Escape') finish(false);
+    }
+
+    overlay.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-confirm]');
+      if (btn) finish(btn.dataset.confirm === 'yes');
+      else if (e.target === overlay) finish(false);
+    });
+    document.addEventListener('keydown', onKey);
+    document.body.appendChild(overlay);
+    overlay.querySelector('[data-confirm="no"]').focus(); // safest choice is focused by default
+  });
+}
+
+window.cancelSubmission = async function(kind, id) {
+  const isConcern = kind === 'concern';
+  const target = (isConcern ? concerns : equipmentReports).find(r => r.id === id);
+  if (!target) return;
+
+  // Only allowed while nobody has started working on it
+  const cancellableStatus = isConcern ? 'Pending' : 'Reported';
+  if (target.status !== cancellableStatus) {
+    alert('This can no longer be cancelled because it is already being handled.');
+    return;
+  }
+
+  const label = isConcern ? (target.type || 'concern').toLowerCase() : 'equipment report';
+  const confirmed = await confirmCancel(label);
+  if (!confirmed) return;
+
+  try {
+    await api(`/${isConcern ? 'concerns' : 'equipment'}/${id}`, { method: 'DELETE' });
+    await loadState();
+  } catch (err) {
+    alert(err.message);
+    return;
+  }
+
+  if (isConcern) renderStudentConcerns();
+  else renderStudentEquipment();
+  renderDashboardSummary();
+  alert(isConcern ? 'Your submission was cancelled.' : 'Your equipment report was cancelled.');
+};
