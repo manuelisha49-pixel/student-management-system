@@ -1057,3 +1057,69 @@ window.saveAdminResponse = async function(id) {
   renderAdminConcerns();
   renderDashboardSummary();
 };
+
+// Photo viewer: click any attached photo to see it full size (arrows / swipe-free: use the buttons or keyboard)
+(function setupPhotoViewer() {
+  let overlay = null;
+  let images = [];
+  let index = 0;
+
+  function show() {
+    const img = overlay.querySelector('img');
+    img.src = images[index].src;
+    img.alt = images[index].alt || 'Attached image';
+    overlay.querySelector('.pv-count').textContent = images.length > 1 ? `${index + 1} / ${images.length}` : '';
+    overlay.classList.toggle('single', images.length < 2);
+  }
+
+  function close() {
+    if (!overlay) return;
+    overlay.remove();
+    overlay = null;
+    document.body.classList.remove('viewer-open');
+  }
+
+  function step(dir) {
+    if (!overlay || images.length < 2) return;
+    index = (index + dir + images.length) % images.length;
+    show();
+  }
+
+  function open(list, start) {
+    close();
+    images = list;
+    index = start;
+    overlay = document.createElement('div');
+    overlay.className = 'photo-viewer';
+    overlay.setAttribute('role', 'dialog');
+    overlay.setAttribute('aria-label', 'Photo viewer');
+    overlay.innerHTML =
+      '<button type="button" class="pv-btn pv-close" aria-label="Close photo">&times;</button>' +
+      '<button type="button" class="pv-btn pv-prev" aria-label="Previous photo">&#8249;</button>' +
+      '<img alt="" />' +
+      '<button type="button" class="pv-btn pv-next" aria-label="Next photo">&#8250;</button>' +
+      '<div class="pv-count"></div>';
+    overlay.addEventListener('click', (e) => {
+      if (e.target.closest('.pv-close') || e.target === overlay) close();
+      else if (e.target.closest('.pv-prev')) step(-1);
+      else if (e.target.closest('.pv-next')) step(1);
+    });
+    document.body.appendChild(overlay);
+    document.body.classList.add('viewer-open');
+    show();
+  }
+
+  document.addEventListener('click', (e) => {
+    const img = e.target.closest('.attachment-preview img');
+    if (!img) return;
+    const group = Array.from(img.closest('.attachment-preview').querySelectorAll('img'));
+    open(group.map((el) => ({ src: el.src, alt: el.alt })), group.indexOf(img));
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (!overlay) return;
+    if (e.key === 'Escape') close();
+    else if (e.key === 'ArrowLeft') step(-1);
+    else if (e.key === 'ArrowRight') step(1);
+  });
+})();
